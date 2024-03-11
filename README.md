@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/5180da364ebf481f8ec9272d8aacbcc3)](https://app.codacy.com/gh/TFG-nicsanmen-rubsuadav/backend/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 # Instalation
 You need to create a virtual environment and install the requirements using the following commands:
 ```bash
@@ -6,7 +8,7 @@ source venv/bin/activate (in Linux/Mac) or .\venv\Scripts\activate (in Windows)
 pip install -r requirements.txt
 ```
 
-# Configuration
+## Configuration
 You need to add the following conf to your local_settings.py:
 ```python
 FIREBASE_API_KEY = 'your_api_key'
@@ -22,7 +24,7 @@ You can get the base64 string from your google credentials file using the follow
 base64 your_google_credentials.json
 ```
 
-# Running
+## Running
 ```bash
 python manage.py runserver
 ```

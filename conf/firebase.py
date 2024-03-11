@@ -4,7 +4,15 @@ from google.cloud.firestore_v1 import Client as FirestoreClient
 import base64
 from firebase_admin import credentials
 try:
-    from local_settings import FIREBASE_API_KEY, FIREBASE_AUTH_DOMAIN, FIREBASE_PROJECT_ID, FIREBASE_STORAGE_BUCKET, FIREBASE_MESSAGING_SENDER_ID, FIREBASE_APP_ID, GOOGLE_APPLICATION_CREDENTIALS_BASE64
+    from local_settings import (
+        FIREBASE_API_KEY,
+        FIREBASE_AUTH_DOMAIN,
+        FIREBASE_PROJECT_ID,
+        FIREBASE_STORAGE_BUCKET,
+        FIREBASE_MESSAGING_SENDER_ID,
+        FIREBASE_APP_ID,
+        GOOGLE_APPLICATION_CREDENTIALS_BASE64
+    )
 except NameError:
     pass
 

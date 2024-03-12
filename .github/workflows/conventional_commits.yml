@@ -1,0 +1,14 @@
+name: Conventional Commits Check 😊
+
+on: ["push"]
+
+jobs:
+  build:
+    name: Conventional Commits Check 😊
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: webiny/action-conventional-commits@v1.3.0
+        with:
+          allowed-commit-types: "feat,fix,refactor,test,chore"

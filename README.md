@@ -1,4 +1,4 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/5180da364ebf481f8ec9272d8aacbcc3)](https://app.codacy.com/gh/TFG-nicsanmen-rubsuadav/backend/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/019fefdf399b4fbf98b009ef7e82820a)](https://app.codacy.com/gh/TFG-nicsanmen-rubsuadav/backend/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 # Instalation
 You need to create a virtual environment and install the requirements using the following commands:

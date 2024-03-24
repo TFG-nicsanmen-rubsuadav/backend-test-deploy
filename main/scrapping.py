@@ -1,29 +1,8 @@
-import time
 from bs4 import BeautifulSoup
-import urllib.request
-import urllib.error
 
 # Local imports
-from .constants import NOT_AVAILABLE_FIELD, MAIN_URL
-from .utils import refactor_phone_number
-
-
-def permission_to_scrap(url):
-    headers = {'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'es'}
-    request = urllib.request.Request(
-        MAIN_URL + url, headers=headers)
-
-    tiempo_espera = 1
-    while True:
-        try:
-            f = urllib.request.urlopen(request)
-            return BeautifulSoup(f, 'lxml')
-        except urllib.error.HTTPError as e:
-            if e.code == 429:
-                print(
-                    f"Error 429: Demasiadas solicitudes. Esperando {tiempo_espera} segundos.")
-                time.sleep(tiempo_espera)
-                tiempo_espera += 1
+from .constants import NOT_AVAILABLE_FIELD
+from .utils import refactor_phone_number, permission_to_scrap, process_reviews
 
 
 def get_restaurant_score(parent: BeautifulSoup):
@@ -33,66 +12,7 @@ def get_restaurant_score(parent: BeautifulSoup):
     except AttributeError:
         global_score = NOT_AVAILABLE_FIELD
 
-    try:
-        data_table = parent.find("section", class_="container nopadding reviews").find(
-            "div", class_="reviewsBySite").find_all("table")
-    except AttributeError:
-        data_table = NOT_AVAILABLE_FIELD
-
-    tripadvisor_number_opinions = 0
-    tripadvisor_score = 0.
-
-    google_number_opinions = 0
-    google_score = 0.
-
-    the_fork_number_opinions = 0
-    the_fork_score = 0.
-
-    for dato in data_table:
-        for row in dato.find_all('tr')[1:]:
-            celda = row.find('a', class_='sitename').img['title']
-            # Tripadvisor
-            if "Tripadvisor" in celda:
-                if row.find('td', class_='rightText') is not None:
-                    trivadvisor_row = row.find_next("td", class_="rightText")
-
-                    tripadvisor_number_opinions = int(
-                        trivadvisor_row.text.strip())
-                    tripadvisor_score = float(trivadvisor_row.find_next(
-                        "td", class_="rightText rating").text.strip().replace(",", "."))
-                else:
-                    tripadvisor_number_opinions = 0
-                    tripadvisor_score = 0.
-            # Google Reviews
-            if "Google" in celda:
-                if row.find('td', class_='rightText') is not None:
-                    google_row = row.find_next("td", class_="rightText")
-
-                    google_number_opinions = int(
-                        google_row.text.strip())
-                    google_score = float(google_row.find_next(
-                        "td", class_="rightText rating").text.strip().replace(",", "."))
-                else:
-                    google_number_opinions = 0
-                    google_score = 0.
-            # TheFork
-            if "TheFork" in celda:
-                if row.find('td', class_='rightText') is not None:
-                    the_fork_row = row.find_next("td", class_="rightText")
-
-                    if the_fork_row.text.strip():
-                        the_fork_number_opinions = int(
-                            the_fork_row.text.strip())
-                    else:
-                        the_fork_number_opinions = 0
-
-                    the_fork_score = float(the_fork_row.find_next(
-                        "td", class_="rightText rating").text.strip().replace(",", "."))
-                else:
-                    the_fork_number_opinions = 0
-                    the_fork_score = 0.
-
-    return global_score, tripadvisor_number_opinions, tripadvisor_score, google_number_opinions, google_score, the_fork_number_opinions, the_fork_score
+    return global_score
 
 
 def get_restaurant_info(parent: BeautifulSoup):
@@ -155,6 +75,38 @@ def get_restaurant_services(name: BeautifulSoup):
     return delivery, take_away, terrace
 
 
+def get_restaurant_opinions(parent: BeautifulSoup):
+    try:
+        data_table = parent.find("section", class_="container nopadding reviews").find(
+            "div", class_="reviewsBySite").find_all("table")
+    except AttributeError:
+        data_table = NOT_AVAILABLE_FIELD
+
+    tripadvisor_number_opinions = 0
+    tripadvisor_score = 0.
+
+    google_number_opinions = 0
+    google_score = 0.
+
+    the_fork_number_opinions = 0
+    the_fork_score = 0.
+
+    for dato in data_table:
+        for row in dato.find_all('tr')[1:]:
+            celda = row.find('a', class_='sitename').img['title']
+
+            tripadvisor_number_opinions, tripadvisor_score = process_reviews(
+                celda, row, "Tripadvisor", tripadvisor_number_opinions, tripadvisor_score)
+
+            google_number_opinions, google_score = process_reviews(
+                celda, row, "Google", google_number_opinions, google_score)
+
+            the_fork_number_opinions, the_fork_score = process_reviews(
+                celda, row, "TheFork", the_fork_number_opinions, the_fork_score)
+
+    return tripadvisor_number_opinions, tripadvisor_score, google_number_opinions, google_score, the_fork_number_opinions, the_fork_score
+
+
 def populateDB():
     for i in range(1, 3):
         s = permission_to_scrap("/restaurantes/?page=" + str(i))
@@ -187,15 +139,16 @@ def populateDB():
 
             full_address, phone_number, website = get_restaurant_info(parent)
 
+            global_score = get_restaurant_score(parent)
+
             (
-                global_score,
                 tripadvisor_number_opinions,
                 tripadvisor_score,
                 google_number_opinions,
                 google_score,
                 the_fork_number_opinions,
                 the_fork_score
-            ) = get_restaurant_score(parent)
+            ) = get_restaurant_opinions(parent)
             print(f"Restaurant: {restaurant_name}")
             print(f"Price: {price}")
             print(f"Address: {full_address}")

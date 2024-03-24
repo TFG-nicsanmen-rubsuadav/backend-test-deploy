@@ -80,8 +80,12 @@ def get_restaurant_score(parent: BeautifulSoup):
                 if row.find('td', class_='rightText') is not None:
                     the_fork_row = row.find_next("td", class_="rightText")
 
-                    the_fork_number_opinions = int(
-                        the_fork_row.text.strip())
+                    if the_fork_row.text.strip():
+                        the_fork_number_opinions = int(
+                            the_fork_row.text.strip())
+                    else:
+                        the_fork_number_opinions = 0
+
                     the_fork_score = float(the_fork_row.find_next(
                         "td", class_="rightText rating").text.strip().replace(",", "."))
                 else:
@@ -122,8 +126,12 @@ def get_restaurant_info(parent: BeautifulSoup):
     phone_number = refactor_phone_number(phone_number)
 
     try:
-        website = data.find("div", class_="pull-right").a["href"]
-    except:
+        div = data.find("div", class_="pull-right")
+        if div is not None and div.a is not None:
+            website = div.a["href"]
+        else:
+            website = NOT_AVAILABLE_FIELD
+    except AttributeError:
         website = NOT_AVAILABLE_FIELD
 
     return full_address, phone_number, website

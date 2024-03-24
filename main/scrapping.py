@@ -1,9 +1,6 @@
 import time
 from bs4 import BeautifulSoup
-
-import os
 import urllib.request
-import ssl
 import urllib.error
 
 # Local imports
@@ -16,8 +13,6 @@ def permission_to_scrap(url):
     request = urllib.request.Request(
         MAIN_URL + url, headers=headers)
 
-    # Algunas veces da error 429 de más peticiones de las permitidas
-    # por lo que agregamos un tiempo de espera para evitarlo
     tiempo_espera = 1
     while True:
         try:
@@ -32,7 +27,6 @@ def permission_to_scrap(url):
 
 
 def get_restaurant_score(parent: BeautifulSoup):
-    # there are a global score and could be Google Reviews Score, Tripadvisor Scores and TheFork Scores
     try:
         global_score = parent.find("section", id="ranking").find(
             "div", class_="ranking").find("div", id="globalrankingbar").span["class"].pop().replace(".", ",")
@@ -42,7 +36,7 @@ def get_restaurant_score(parent: BeautifulSoup):
     try:
         data_table = parent.find("section", class_="container nopadding reviews").find(
             "div", class_="reviewsBySite").find_all("table")
-    except:
+    except AttributeError:
         data_table = NOT_AVAILABLE_FIELD
 
     tripadvisor_number_opinions = 0
@@ -108,13 +102,13 @@ def get_restaurant_info(parent: BeautifulSoup):
 
     try:
         street_address = data_adress.span.text.strip()
-    except:
+    except AttributeError:
         street_address = NOT_AVAILABLE_FIELD
 
     try:
         address_locality = data_adress.find(
             "span", {"itemprop": "addressLocality"}).text.strip()
-    except:
+    except AttributeError:
         address_locality = NOT_AVAILABLE_FIELD
 
     full_address = street_address + ", " + address_locality
@@ -122,7 +116,7 @@ def get_restaurant_info(parent: BeautifulSoup):
     try:
         phone_number = data.find(
             "a", class_="i-block").span.text.strip()
-    except:
+    except AttributeError:
         phone_number = NOT_AVAILABLE_FIELD
 
     phone_number = refactor_phone_number(phone_number)
@@ -173,7 +167,7 @@ def populateDB():
             try:
                 image = restaurant.find(
                     "div", class_="col-md-7").a.img["data-src"]
-            except:
+            except AttributeError:
                 image = NOT_AVAILABLE_FIELD
 
             delivery, take_away, terrace = get_restaurant_services(name)

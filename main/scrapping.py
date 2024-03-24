@@ -11,11 +11,6 @@ from .constants import NOT_AVAILABLE_FIELD, MAIN_URL
 from .utils import refactor_phone_number
 
 
-if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
-        getattr(ssl, '_create_unverified_context', None)):
-    ssl._create_default_https_context = ssl._create_unverified_context
-
-
 def permission_to_scrap(url):
     headers = {'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'es'}
     request = urllib.request.Request(
@@ -41,7 +36,7 @@ def get_restaurant_score(parent: BeautifulSoup):
     try:
         global_score = parent.find("section", id="ranking").find(
             "div", class_="ranking").find("div", id="globalrankingbar").span["class"].pop().replace(".", ",")
-    except:
+    except AttributeError:
         global_score = NOT_AVAILABLE_FIELD
 
     try:
@@ -107,7 +102,7 @@ def get_restaurant_info(parent: BeautifulSoup):
         data = parent.find("section", class_="row").find(
             "div", class_="hl_row")
         data_adress = data.a
-    except:
+    except AttributeError:
         data = NOT_AVAILABLE_FIELD
         data_adress = NOT_AVAILABLE_FIELD
 
@@ -190,8 +185,15 @@ def populateDB():
 
             full_address, phone_number, website = get_restaurant_info(parent)
 
-            global_score, tripadvisor_number_opinions, tripadvisor_score, google_number_opinions, google_score, the_fork_number_opinions, the_fork_score = get_restaurant_score(
-                parent)
+            (
+                global_score,
+                tripadvisor_number_opinions,
+                tripadvisor_score,
+                google_number_opinions,
+                google_score,
+                the_fork_number_opinions,
+                the_fork_score
+            ) = get_restaurant_score(parent)
             print(f"Restaurant: {restaurant_name}")
             print(f"Price: {price}")
             print(f"Address: {full_address}")

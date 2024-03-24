@@ -121,7 +121,7 @@ def populateDB():
             try:
                 price = name.find_next_sibling(
                     "span", class_="price info").text.strip()
-            except:
+            except AttributeError:
                 price = NOT_AVAILABLE_FIELD
 
             try:

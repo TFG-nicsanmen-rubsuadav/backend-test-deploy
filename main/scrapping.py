@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 
 # Local imports
 from .constants import NOT_AVAILABLE_FIELD
-from .utils import refactor_phone_number, permission_to_scrap, process_reviews
+from .utils import refactor_phone_number, permission_to_scrap, ReviewSite
 
 
 def get_restaurant_score(parent: BeautifulSoup):
@@ -82,29 +82,19 @@ def get_restaurant_opinions(parent: BeautifulSoup):
     except AttributeError:
         data_table = NOT_AVAILABLE_FIELD
 
-    tripadvisor_number_opinions = 0
-    tripadvisor_score = 0.
-
-    google_number_opinions = 0
-    google_score = 0.
-
-    the_fork_number_opinions = 0
-    the_fork_score = 0.
+    tripadvisor = ReviewSite("Tripadvisor")
+    google = ReviewSite("Google")
+    the_fork = ReviewSite("TheFork")
 
     for dato in data_table:
         for row in dato.find_all('tr')[1:]:
             celda = row.find('a', class_='sitename').img['title']
 
-            tripadvisor_number_opinions, tripadvisor_score = process_reviews(
-                celda, row, "Tripadvisor", tripadvisor_number_opinions, tripadvisor_score)
+            tripadvisor.process_reviews(celda, row)
+            google.process_reviews(celda, row)
+            the_fork.process_reviews(celda, row)
 
-            google_number_opinions, google_score = process_reviews(
-                celda, row, "Google", google_number_opinions, google_score)
-
-            the_fork_number_opinions, the_fork_score = process_reviews(
-                celda, row, "TheFork", the_fork_number_opinions, the_fork_score)
-
-    return tripadvisor_number_opinions, tripadvisor_score, google_number_opinions, google_score, the_fork_number_opinions, the_fork_score
+    return tripadvisor.number_opinions, tripadvisor.score, google.number_opinions, google.score, the_fork.number_opinions, the_fork.score
 
 
 def populateDB():

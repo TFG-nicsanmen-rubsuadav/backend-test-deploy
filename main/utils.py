@@ -34,19 +34,23 @@ def permission_to_scrap(url):
                 tiempo_espera += 1
 
 
-def process_reviews(celda, row: BeautifulSoup, site_name, number_opinions, score):
-    if site_name in celda:
-        if row.find('td', class_='rightText') is not None:
-            review_row = row.find_next("td", class_="rightText")
+class ReviewSite:
+    def __init__(self, name: str):
+        self.name = name
+        self.number_opinions = 0
+        self.score = 0.
 
-            if review_row.text.strip():
-                number_opinions = int(review_row.text.strip())
+    def process_reviews(self, celda: BeautifulSoup, row: BeautifulSoup):
+        if self.name in celda:
+            if row.find('td', class_='rightText') is not None:
+                review_row = row.find_next("td", class_="rightText")
+                if review_row.text.strip():
+                    self.number_opinions = int(review_row.text.strip())
+                else:
+                    self.number_opinions = 0
+
+                self.score = float(review_row.find_next(
+                    "td", class_="rightText rating").text.strip().replace(",", "."))
             else:
-                number_opinions = 0
-
-            score = float(review_row.find_next(
-                "td", class_="rightText rating").text.strip().replace(",", "."))
-        else:
-            number_opinions = 0
-            score = 0.
-    return number_opinions, score
+                self.number_opinions = 0
+                self.score = 0.

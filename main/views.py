@@ -1,8 +1,8 @@
-from django.http import HttpResponse
+from django.http import JsonResponse
 
 # local imports
-from main.scrapping import populateDB
+from main.scrapping import get_restaurants
 
 
 def index(request):
-    return HttpResponse(populateDB())
+    return JsonResponse(get_restaurants(), safe=False)

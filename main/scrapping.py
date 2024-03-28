@@ -1,7 +1,8 @@
 from bs4 import BeautifulSoup
+import time
 
 # Local imports
-from .constants import NOT_AVAILABLE_FIELD
+from .constants import NOT_AVAILABLE_FIELD, GOOGLE, TRIPADVISOR, THEFORK
 from .utils import refactor_phone_number, permission_to_scrap, ReviewSite
 
 
@@ -75,16 +76,16 @@ def get_restaurant_services(name: BeautifulSoup):
     return delivery, take_away, terrace
 
 
-def get_restaurant_opinions(parent: BeautifulSoup):
+def get_restaurant_ranking(parent: BeautifulSoup):
     try:
         data_table = parent.find("section", class_="container nopadding reviews").find(
             "div", class_="reviewsBySite").find_all("table")
     except AttributeError:
         data_table = NOT_AVAILABLE_FIELD
 
-    tripadvisor = ReviewSite("Tripadvisor")
-    google = ReviewSite("Google")
-    the_fork = ReviewSite("TheFork")
+    tripadvisor = ReviewSite(TRIPADVISOR)
+    google = ReviewSite(GOOGLE)
+    the_fork = ReviewSite(THEFORK)
 
     for dato in data_table:
         for row in dato.find_all('tr')[1:]:
@@ -97,7 +98,33 @@ def get_restaurant_opinions(parent: BeautifulSoup):
     return tripadvisor.number_opinions, tripadvisor.score, google.number_opinions, google.score, the_fork.number_opinions, the_fork.score
 
 
-def populateDB():
+# METHOD FOR GETTING THE OPINIONS OF THE RESTAURANT (FK TO RESTAURANT)
+def get_restaurant_opinions(parent: BeautifulSoup):
+    comments_data = parent.find("section", class_="container nopadding reviews").find(
+        "div", id="reviews").find_all("div", {"itemprop": "review"})
+    comments_list = []
+    for data in comments_data:
+        comment = {}
+        comment['review'] = data.find("div", class_="text").text.strip()
+
+        users_data = data.find(
+            "div", class_="userSite pull-left")
+
+        comment['date'] = users_data.find(
+            "div", class_="ratingDate").text.strip()
+        comment['user'] = users_data.span.text.strip()
+        comment["rating"] = float(users_data.find(
+            "span", class_="stars").text.strip().replace(",", "."))
+        site = data.find("div", class_="pull-right site").span.a.text.strip()
+        if site not in [TRIPADVISOR, GOOGLE, THEFORK]:
+            site = NOT_AVAILABLE_FIELD
+        comments_list.append(comment)
+    return comments_list
+
+
+def get_restaurants():
+    results = []
+    start_time = time.time()
     for i in range(1, 3):
         s = permission_to_scrap("/restaurantes/?page=" + str(i))
 
@@ -138,21 +165,37 @@ def populateDB():
                 google_score,
                 the_fork_number_opinions,
                 the_fork_score
-            ) = get_restaurant_opinions(parent)
-            print(f"Restaurant: {restaurant_name}")
-            print(f"Price: {price}")
-            print(f"Address: {full_address}")
-            print(f"Phone: {phone_number}")
-            print(f"Website: {website}")
-            print(f"Delivery: {delivery}")
-            print(f"Take Away: {take_away}")
-            print(f"Terrace: {terrace}")
-            print(f"Global Score: {global_score}")
-            print(f"TripAdvisor Opinions: {tripadvisor_number_opinions}")
-            print(f"TripAdvisor Score: {tripadvisor_score}")
-            print(f"Google Opinions: {google_number_opinions}")
-            print(f"Google Score: {google_score}")
-            print(f"The Fork Opinions: {the_fork_number_opinions}")
-            print(f"The Fork Score: {the_fork_score}")
-            print(f"Image: {image}")
-            print("\n\n")
+            ) = get_restaurant_ranking(parent)
+
+            comments_restaurant_list = get_restaurant_opinions(parent)
+
+            # List of comments to be added to the restaurant (FK)
+            # TODO: Refactor this to a function
+            comments = []
+
+            for comment in comments_restaurant_list:
+                comments.append(comment)
+
+            results.append({
+                "restaurant_name": restaurant_name,
+                "price": price,
+                "image": image,
+                "delivery": delivery,
+                "take_away": take_away,
+                "terrace": terrace,
+                "full_address": full_address,
+                "phone_number": phone_number,
+                "website": website,
+                "global_score": global_score,
+                "tripadvisor_number_opinions": tripadvisor_number_opinions,
+                "tripadvisor_score": tripadvisor_score,
+                "google_number_opinions": google_number_opinions,
+                "google_score": google_score,
+                "the_fork_number_opinions": the_fork_number_opinions,
+                "the_fork_score": the_fork_score,
+                "comments": comments
+            })
+
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+    return results

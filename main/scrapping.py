@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
-import time
 import concurrent.futures
+from tqdm import tqdm
+from colorama import Fore, Style
 
 # Local imports
 from .constants import NOT_AVAILABLE_FIELD, GOOGLE, TRIPADVISOR, THEFORK
@@ -168,7 +169,6 @@ def get_restaurants(page: int):
 
         comments_restaurant_list = get_restaurant_opinions(parent)
 
-        # List of comments to be added to the restaurant (FK)
         # TODO: Refactor this to a function
         comments = []
 
@@ -199,12 +199,22 @@ def get_restaurants(page: int):
 
 
 def parallel_scraping():
-    start_time = time.time()
     with concurrent.futures.ProcessPoolExecutor() as executor:
         results = []
-        for result in executor.map(get_restaurants, range(1, 4)):
+        for i, result in enumerate(tqdm(executor.map(get_restaurants, range(1, 4)), total=3, desc="Scraping")):
             results.extend(result)
+            percent_complete = (i + 1) / 3 * 100
 
-    end_time = time.time()
-    print(f"Time elapsed: {end_time - start_time}")
+            if 0 <= percent_complete <= 25:
+                color = Fore.RED
+            elif 25 < percent_complete <= 50:
+                color = Fore.YELLOW
+            elif 50 < percent_complete <= 75:
+                color = Fore.GREEN
+            else:
+                color = Fore.BLUE
+
+            tqdm.write(
+                f'{color}Scraping progress: {percent_complete}%{Style.RESET_ALL}')
+
     return results

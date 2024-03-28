@@ -9,9 +9,8 @@ from conf.firebase import firestore
 from .scrapping import parallel_scraping
 
 
-def insert_restaurant(restaurant):
+def insert_restaurant(restaurant: dict):
     comments = restaurant.pop('comments', [])
-    # Check if the restaurant already exists
     existing_restaurant = firestore.collection('restaurants').where(filter=FieldFilter(
         'restaurant_name', '==', restaurant['restaurant_name'])).where(filter=FieldFilter('full_address', '==', restaurant['full_address'])).get()
     if existing_restaurant:
@@ -34,10 +33,8 @@ class PopulateDatabase(BaseCommand):
                         insert_restaurant, restaurant))
                     pbar.update(1)
 
-                    # Calcute % completed
                     percent_complete = (i + 1) / len(restaurants) * 100
 
-                    # Change the color of the progress bar according to the percentage completed
                     if 0 <= percent_complete <= 25:
                         color = Fore.RED
                     elif 25 < percent_complete <= 50:
@@ -47,7 +44,6 @@ class PopulateDatabase(BaseCommand):
                     else:
                         color = Fore.BLUE
 
-                    # Update the style of the description bar
                     pbar.set_description(
                         f'{color}Populating database{Style.RESET_ALL}')
 

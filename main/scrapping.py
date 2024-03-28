@@ -202,7 +202,7 @@ def parallel_scraping():
     start_time = time.time()
     with concurrent.futures.ProcessPoolExecutor() as executor:
         results = []
-        for result in executor.map(get_restaurants, range(1, 3)):
+        for result in executor.map(get_restaurants, range(1, 4)):
             results.extend(result)
 
     end_time = time.time()

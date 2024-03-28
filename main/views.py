@@ -1,8 +1,9 @@
 from django.http import JsonResponse
 
 # local imports
-from .scrapping import parallel_scraping
+from .populateDB import PopulateDatabase
 
 
 def index(request):
-    return JsonResponse(parallel_scraping(), safe=False)
+    initialize_populate = PopulateDatabase()
+    return JsonResponse((initialize_populate.populate()), safe=False)

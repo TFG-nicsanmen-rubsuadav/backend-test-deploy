@@ -49,8 +49,16 @@ class ReviewSite:
                 else:
                     self.number_opinions = 0
 
-                self.score = float(review_row.find_next(
-                    "td", class_="rightText rating").text.strip().replace(",", "."))
+                review_row_score = review_row.find_next(
+                    "td", class_="rightText rating")
+                if review_row_score.text.strip():
+                    try:
+                        self.score = float(
+                            review_row_score.text.replace(",", "."))
+                    except ValueError:
+                        self.score = 0.
+                else:
+                    self.score = 0.
             else:
                 self.number_opinions = 0
                 self.score = 0.

@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import time
+import concurrent.futures
 
 # Local imports
 from .constants import NOT_AVAILABLE_FIELD, GOOGLE, TRIPADVISOR, THEFORK
@@ -122,80 +123,88 @@ def get_restaurant_opinions(parent: BeautifulSoup):
     return comments_list
 
 
-def get_restaurants():
+def get_restaurants(page: int):
     results = []
+    s = permission_to_scrap("/restaurantes/?page=" + str(page))
+
+    restaurants = s.find("section", id="content").find("div", id="main_content").find("div", class_="searchResults").find_all(
+        "div", class_="resultItem")
+    for restaurant in restaurants:
+        name = restaurant.find("h3", class_="restaurantName")
+
+        restaurant_name = name.a.text.strip()
+
+        try:
+            price = name.find_next_sibling(
+                "span", class_="price info").text.strip()
+        except AttributeError:
+            price = NOT_AVAILABLE_FIELD
+
+        try:
+            image = restaurant.find(
+                "div", class_="col-md-7").a.img["data-src"]
+        except AttributeError:
+            image = NOT_AVAILABLE_FIELD
+
+        delivery, take_away, terrace = get_restaurant_services(name)
+
+        local_url = restaurant.find(
+            "h3", class_="restaurantName").a["href"]
+        s2 = permission_to_scrap(local_url)
+        parent = s2.find("body", class_="restaurant")
+
+        full_address, phone_number, website = get_restaurant_info(parent)
+
+        global_score = get_restaurant_score(parent)
+
+        (
+            tripadvisor_number_opinions,
+            tripadvisor_score,
+            google_number_opinions,
+            google_score,
+            the_fork_number_opinions,
+            the_fork_score
+        ) = get_restaurant_ranking(parent)
+
+        comments_restaurant_list = get_restaurant_opinions(parent)
+
+        # List of comments to be added to the restaurant (FK)
+        # TODO: Refactor this to a function
+        comments = []
+
+        for comment in comments_restaurant_list:
+            comments.append(comment)
+
+        results.append({
+            "restaurant_name": restaurant_name,
+            "price": price,
+            "image": image,
+            "delivery": delivery,
+            "take_away": take_away,
+            "terrace": terrace,
+            "full_address": full_address,
+            "phone_number": phone_number,
+            "website": website,
+            "global_score": global_score,
+            "tripadvisor_number_opinions": tripadvisor_number_opinions,
+            "tripadvisor_score": tripadvisor_score,
+            "google_number_opinions": google_number_opinions,
+            "google_score": google_score,
+            "the_fork_number_opinions": the_fork_number_opinions,
+            "the_fork_score": the_fork_score,
+            "comments": comments
+        })
+
+    return results
+
+
+def parallel_scraping():
     start_time = time.time()
-    for i in range(1, 3):
-        s = permission_to_scrap("/restaurantes/?page=" + str(i))
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        results = []
+        for result in executor.map(get_restaurants, range(1, 3)):
+            results.extend(result)
 
-        restaurants = s.find("section", id="content").find("div", id="main_content").find("div", class_="searchResults").find_all(
-            "div", class_="resultItem")
-        for restaurant in restaurants:
-            name = restaurant.find("h3", class_="restaurantName")
-
-            restaurant_name = name.a.text.strip()
-
-            try:
-                price = name.find_next_sibling(
-                    "span", class_="price info").text.strip()
-            except AttributeError:
-                price = NOT_AVAILABLE_FIELD
-
-            try:
-                image = restaurant.find(
-                    "div", class_="col-md-7").a.img["data-src"]
-            except AttributeError:
-                image = NOT_AVAILABLE_FIELD
-
-            delivery, take_away, terrace = get_restaurant_services(name)
-
-            local_url = restaurant.find(
-                "h3", class_="restaurantName").a["href"]
-            s2 = permission_to_scrap(local_url)
-            parent = s2.find("body", class_="restaurant")
-
-            full_address, phone_number, website = get_restaurant_info(parent)
-
-            global_score = get_restaurant_score(parent)
-
-            (
-                tripadvisor_number_opinions,
-                tripadvisor_score,
-                google_number_opinions,
-                google_score,
-                the_fork_number_opinions,
-                the_fork_score
-            ) = get_restaurant_ranking(parent)
-
-            comments_restaurant_list = get_restaurant_opinions(parent)
-
-            # List of comments to be added to the restaurant (FK)
-            # TODO: Refactor this to a function
-            comments = []
-
-            for comment in comments_restaurant_list:
-                comments.append(comment)
-
-            results.append({
-                "restaurant_name": restaurant_name,
-                "price": price,
-                "image": image,
-                "delivery": delivery,
-                "take_away": take_away,
-                "terrace": terrace,
-                "full_address": full_address,
-                "phone_number": phone_number,
-                "website": website,
-                "global_score": global_score,
-                "tripadvisor_number_opinions": tripadvisor_number_opinions,
-                "tripadvisor_score": tripadvisor_score,
-                "google_number_opinions": google_number_opinions,
-                "google_score": google_score,
-                "the_fork_number_opinions": the_fork_number_opinions,
-                "the_fork_score": the_fork_score,
-                "comments": comments
-            })
-
-    print("--- %s seconds ---" % (time.time() - start_time))
-
+    end_time = time.time()
+    print(f"Time elapsed: {end_time - start_time}")
     return results

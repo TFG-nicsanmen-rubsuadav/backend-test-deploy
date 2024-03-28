@@ -1,8 +1,8 @@
 from django.http import JsonResponse
 
 # local imports
-from main.scrapping import get_restaurants
+from .scrapping import parallel_scraping
 
 
 def index(request):
-    return JsonResponse(get_restaurants(), safe=False)
+    return JsonResponse(parallel_scraping(), safe=False)

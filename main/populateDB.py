@@ -50,5 +50,5 @@ class PopulateDatabase(BaseCommand):
                 concurrent.futures.wait(futures)
         self.stdout.write(self.style.SUCCESS(
             f'Database populated successfully, populated {len(restaurants)} restaurants'))
-        
+
         return restaurants

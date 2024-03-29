@@ -8,6 +8,24 @@ from .constants import NOT_AVAILABLE_FIELD, GOOGLE, TRIPADVISOR, THEFORK
 from .utils import refactor_phone_number, permission_to_scrap, ReviewSite
 
 
+def get_restaurant_main_info(name: BeautifulSoup, restaurant: BeautifulSoup):
+    restaurant_name = name.a.text.strip()
+
+    try:
+        price = name.find_next_sibling(
+            "span", class_="price info").text.strip()
+    except AttributeError:
+        price = NOT_AVAILABLE_FIELD
+
+    try:
+        image = restaurant.find(
+            "div", class_="col-md-7").a.img["data-src"]
+    except AttributeError:
+        image = NOT_AVAILABLE_FIELD
+
+    return restaurant_name, price, image
+
+
 def get_restaurant_score(parent: BeautifulSoup):
     try:
         global_score = parent.find("section", id="ranking").find(
@@ -130,23 +148,12 @@ def get_restaurants(page: int):
 
     restaurants = s.find("section", id="content").find("div", id="main_content").find("div", class_="searchResults").find_all(
         "div", class_="resultItem")
+
     for restaurant in restaurants:
         name = restaurant.find("h3", class_="restaurantName")
 
-        restaurant_name = name.a.text.strip()
-
-        try:
-            price = name.find_next_sibling(
-                "span", class_="price info").text.strip()
-        except AttributeError:
-            price = NOT_AVAILABLE_FIELD
-
-        try:
-            image = restaurant.find(
-                "div", class_="col-md-7").a.img["data-src"]
-        except AttributeError:
-            image = NOT_AVAILABLE_FIELD
-
+        restaurant_name, price, image = get_restaurant_main_info(
+            name, restaurant)
         delivery, take_away, terrace = get_restaurant_services(name)
 
         local_url = restaurant.find(
@@ -155,7 +162,6 @@ def get_restaurants(page: int):
         parent = s2.find("body", class_="restaurant")
 
         full_address, phone_number, website = get_restaurant_info(parent)
-
         global_score = get_restaurant_score(parent)
 
         (
@@ -166,14 +172,6 @@ def get_restaurants(page: int):
             the_fork_number_opinions,
             the_fork_score
         ) = get_restaurant_ranking(parent)
-
-        comments_restaurant_list = get_restaurant_opinions(parent)
-
-        # TODO: Refactor this to a function
-        comments = []
-
-        for comment in comments_restaurant_list:
-            comments.append(comment)
 
         results.append({
             "restaurant_name": restaurant_name,
@@ -192,7 +190,7 @@ def get_restaurants(page: int):
             "google_score": google_score,
             "the_fork_number_opinions": the_fork_number_opinions,
             "the_fork_score": the_fork_score,
-            "comments": comments
+            "comments": [comment for comment in get_restaurant_opinions(parent)]
         })
 
     return results

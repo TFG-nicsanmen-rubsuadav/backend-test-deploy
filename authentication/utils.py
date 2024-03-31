@@ -12,7 +12,6 @@ from .constants import (
     PASSWORD_LOWERCASE,
     PASSWORD_UPPERCASE,
     PASSWORD_DIGIT,
-    ROLE_LENGTH,
     ROLES, ROLE_NOT_ALLOWED
 )
 
@@ -64,18 +63,13 @@ def validate_user_creation(user):
         raise ValueError(PASSWORD_UPPERCASE)
     if not re.search('[0-9]', password):
         raise ValueError(PASSWORD_DIGIT)
-    if not re.search('[!@#$%^&*(),.?":{}|<>]', password):
+    if not re.search('[!#$%&()*+,-./:;<=>?@[\]^_`{|}~]', password):
         raise ValueError(PASSWORD_SPECIAL_CHAR)
 
 
 def get_allowed_roles(role: str):
     if role not in ROLES:
         raise ValueError(ROLE_NOT_ALLOWED)
-
-
-def validate_role_creation(rol: str):
-    if len(rol) < 3:
-        raise ValueError(ROLE_LENGTH)
 
 
 def check_roles(rol: str) -> str | bool:

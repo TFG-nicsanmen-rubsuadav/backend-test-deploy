@@ -1,17 +1,16 @@
 # local imports
-from .utils import validate_user_creation, validate_role_creation, check_roles, get_allowed_roles
+from .utils import validate_user_creation, check_roles, get_allowed_roles
 from conf.firebase import firestore
 
 
 # Role model
 def create_role(role: str):
-    get_allowed_roles(role)
     role_id = check_roles(role)
     if role_id:
         return role_id
     else:
         try:
-            validate_role_creation(role)
+            get_allowed_roles(role)
             _, role_ref = firestore.collection("roles").add({
                 "name": role
             })

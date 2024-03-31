@@ -11,3 +11,6 @@ PASSWORD_SPECIAL_CHAR = "Password must contain at least one special character"
 EMAIL_ALREADY_IN_USE = "Email already in use"
 PHONE_ALREADY_IN_USE = "Phone already in use"
 ROLE_LENGTH = "Role must have more than 3 characters"
+ROLE_NOT_ALLOWED = "Role not allowed"
+
+ROLES = ["admin", "owner", "customer", "authorizated"]

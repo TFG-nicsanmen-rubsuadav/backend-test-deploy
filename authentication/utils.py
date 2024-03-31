@@ -12,7 +12,8 @@ from .constants import (
     PASSWORD_LOWERCASE,
     PASSWORD_UPPERCASE,
     PASSWORD_DIGIT,
-    ROLE_LENGTH
+    ROLE_LENGTH,
+    ROLES, ROLE_NOT_ALLOWED
 )
 
 from conf.firebase import firestore
@@ -65,6 +66,11 @@ def validate_user_creation(user):
         raise ValueError(PASSWORD_DIGIT)
     if not re.search('[!@#$%^&*(),.?":{}|<>]', password):
         raise ValueError(PASSWORD_SPECIAL_CHAR)
+
+
+def get_allowed_roles(role: str):
+    if role not in ROLES:
+        raise ValueError(ROLE_NOT_ALLOWED)
 
 
 def validate_role_creation(rol: str):

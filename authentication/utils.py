@@ -1,6 +1,6 @@
 from datetime import datetime
 import re
-import random
+import secrets
 
 # local imports
 from .constants import (
@@ -86,9 +86,9 @@ def generate_phone_number():
     phone_number = ''
     for i in range(9):
         if i == 0:
-            phone_number += str(random.randint(6, 7))
+            phone_number += str(secrets.choice([6, 7]))
         else:
-            phone_number += str(random.randint(0, 9))
+            phone_number += str(secrets.randbelow(10))
     return phone_number
 
 

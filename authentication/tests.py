@@ -5,7 +5,7 @@ from parameterized import parameterized
 import json
 import requests
 import string
-import random
+import secrets
 
 # local imports
 from .utils import get_test_data, generate_phone_number
@@ -17,9 +17,9 @@ class CreateUsersAdminTest(APITestCase):
 
         mail = fetch.json()['results'][0]['email'].replace('example', 'gmail')
         password = fetch.json()['results'][0]['login']['password']
-        password += random.choice(string.punctuation)
-        password += random.choice(string.ascii_uppercase)
-        password += random.choice(string.digits)
+        password += secrets.choice(string.punctuation)
+        password += secrets.choice(string.ascii_uppercase)
+        password += secrets.choice(string.digits)
         name = fetch.json()['results'][0]['name']['first']
         last_name = fetch.json()['results'][0]['name']['last']
         phone_number = generate_phone_number()

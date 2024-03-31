@@ -11,8 +11,7 @@ from .constants import (
     BIRTH_DATE_FORMAT, PASSWORD_LENGTH,
     PASSWORD_LOWERCASE,
     PASSWORD_UPPERCASE,
-    PASSWORD_DIGIT,
-    PASSWORD_SPECIAL_CHAR
+    PASSWORD_DIGIT
 )
 
 from conf.firebase import firestore

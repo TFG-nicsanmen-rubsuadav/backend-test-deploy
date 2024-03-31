@@ -11,7 +11,8 @@ from .constants import (
     BIRTH_DATE_FORMAT, PASSWORD_LENGTH,
     PASSWORD_LOWERCASE,
     PASSWORD_UPPERCASE,
-    PASSWORD_DIGIT
+    PASSWORD_DIGIT,
+    ROLE_LENGTH
 )
 
 from conf.firebase import firestore
@@ -64,3 +65,16 @@ def validate_user_creation(user):
         raise ValueError(PASSWORD_DIGIT)
     if not re.search('[!@#$%^&*(),.?":{}|<>]', password):
         raise ValueError(PASSWORD_SPECIAL_CHAR)
+
+
+def validate_role_creation(rol: str):
+    if len(rol) < 3:
+        raise ValueError(ROLE_LENGTH)
+
+
+def check_roles(rol: str) -> str | bool:
+    roles = firestore.collection("roles").stream()
+    for r in roles:
+        if r.to_dict()["name"] == rol:
+            return r.id
+    return False

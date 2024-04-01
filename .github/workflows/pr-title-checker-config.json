@@ -8,7 +8,7 @@
     "prefixes": [
       "hotfix: ",
       "fix: ",
-      "feature: ",
+      "feat: ",
       "refactor: ",
       "chore: ",
       "sync: ",

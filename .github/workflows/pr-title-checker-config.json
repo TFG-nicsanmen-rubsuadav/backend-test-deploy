@@ -1,0 +1,30 @@
+{
+  "CHECKS": {
+    "ignoreLabels": [
+      "dont-check-PRs-with-this-label",
+      "meta",
+      "ignore"
+    ],
+    "prefixes": [
+      "hotfix: ",
+      "fix: ",
+      "feature: ",
+      "refactor: ",
+      "chore: ",
+      "sync: ",
+      "release",
+      "test"
+    ],
+    "regexp": "docs\\(v[0-9]\\): ",
+    "regexpFlags": "i"
+  },
+  "LABEL": {
+    "color": "EEEEEE",
+    "name": "title needs formatting"
+  },
+  "MESSAGES": {
+    "failure": "Failing CI test",
+    "notice": "",
+    "success": "All OK"
+  }
+}

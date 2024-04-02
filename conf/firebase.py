@@ -3,6 +3,11 @@ import firebase_admin
 from google.cloud.firestore_v1 import Client as FirestoreClient
 import base64
 from firebase_admin import credentials
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 try:
     from local_settings import (
         FIREBASE_API_KEY,
@@ -13,8 +18,15 @@ try:
         FIREBASE_APP_ID,
         GOOGLE_APPLICATION_CREDENTIALS_BASE64
     )
-except NameError:
-    pass
+except ModuleNotFoundError:
+    FIREBASE_API_KEY = os.getenv('FIREBASE_API_KEY')
+    FIREBASE_AUTH_DOMAIN = os.getenv('FIREBASE_AUTH_DOMAIN')
+    FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID')
+    FIREBASE_STORAGE_BUCKET = os.getenv('FIREBASE_STORAGE_BUCKET')
+    FIREBASE_MESSAGING_SENDER_ID = os.getenv('FIREBASE_MESSAGING_SENDER_ID')
+    FIREBASE_APP_ID = os.getenv('FIREBASE_APP_ID')
+    GOOGLE_APPLICATION_CREDENTIALS_BASE64 = os.getenv(
+        'GOOGLE_APPLICATION_CREDENTIALS_BASE64')
 
 # Firebase configuration
 config = {

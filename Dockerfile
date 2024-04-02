@@ -12,6 +12,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the project files
 COPY . .
 
+# Copy the .env file
+COPY .env .env
+
 # Expose the server port
 EXPOSE 8000
 

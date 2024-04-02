@@ -1,9 +1,9 @@
-from django.http import HttpResponse
+from django.http import JsonResponse
 
 # local imports
-from conf.firebase import config, firestore
+from .populateDB import PopulateDatabase
 
 
 def index(request):
-    firestore.collection('test').document('test').set({'test': 'test'})
-    return HttpResponse(f"Hello, world. You're at the main index.{config['apiKey']}")
+    initialize_populate = PopulateDatabase()
+    return JsonResponse((initialize_populate.populate()), safe=False)

@@ -7,3 +7,8 @@ django-cors-headers==4.3.1 # Django app for handling the server headers required
 beautifulsoup4==4.12.3 # Python library for web scraping
 tqdm==4.66.2 # Python library for adding progress bars to loops
 codacy-coverage==1.3.11 # Tool for uploading code coverage reports to Codacy
+lxml==5.1.0 # Python library for processing XML and HTML
+colorama==0.4.6 # Python library for adding color to the terminal
+parameterized == 0.9.0 # Python library for parameterized testing
+gunicorn == 21.2.0 # Python WSGI HTTP server for UNIX
+python-dotenv == 1.0.1 # Python library for reading .env files

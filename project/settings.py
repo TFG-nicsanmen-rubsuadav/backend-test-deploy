@@ -141,19 +141,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Importing local settings
-try:
-    from local_settings import *
-except ImportError:
-    print(
-        "local_settings.py no se encuentra. Debes de crearlo para poder utilizar la aplicacion. \n \
-        Esta configuración es la que debes de incluir: \n \t \f \
-            FIREBASE_API_KEY = 'tuApiKey' \n \t \
-                FIREBASE_AUTH_DOMAIN = 'tudominio' \n \t \
-                    FIREBASE_PROJECT_ID = 'projectid' \n \t \
-                        FIREBASE_STORAGE_BUCKET = 'tustorage' \n \t \
-                            FIREBASE_MESSAGING_SENDER_ID = 'tucmessage' \n \t \
-                                FIREBASE_APP_ID = 'tuappid' \n \t \f \
-        No olvides reemplazar esas variables por las generadas por firebase. \n \t \f"
-    )

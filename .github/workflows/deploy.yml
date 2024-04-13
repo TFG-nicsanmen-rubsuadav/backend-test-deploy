@@ -36,6 +36,10 @@ jobs:
           python --version
           pip freeze
 
+      - name: Set Python version on Azure
+        run: |
+          az webapp config appsettings set --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group test --settings WEBSITE_RUN_FROM_PACKAGE=1
+
       - name: Deploy web App using GH Action azure/webapps-deploy
         uses: azure/webapps-deploy@v3
         with:

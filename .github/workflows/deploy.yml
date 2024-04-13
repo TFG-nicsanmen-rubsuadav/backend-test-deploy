@@ -2,24 +2,17 @@ name: Python application
 
 on: [push]
 
-env:
-  AZURE_WEBAPP_NAME: pruebaCI # set this to your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: "." # set this to the path to your web app project, defaults to the repository root
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Set up Python 3.10
+      - name: Set up Python 3.10.9
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10.13"
+          python-version: "3.10.9"
 
       - name: Create virtual environment
         run: |
@@ -28,7 +21,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Check Python version and dependencies
@@ -36,15 +28,15 @@ jobs:
           python --version
           pip freeze
 
-      - name: Set Python version on Azure
+      - name: Install Azure CLI
         run: |
-          az webapp config appsettings set --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group test --settings WEBSITE_RUN_FROM_PACKAGE=1
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-      - name: Deploy web App using GH Action azure/webapps-deploy
-        uses: azure/webapps-deploy@v3
+      - name: Login to Azure
+        uses: azure/login@v1
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-      - name: logout
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
         run: |
-          az logout
+          az webapp up --runtime PYTHON:3.10 --logs --sku B1 --location westeurope

@@ -19,13 +19,17 @@ jobs:
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           python --version
           pip freeze
+
+      - name: Azure check Python and installed packages
+        run: |
+          az webapp ssh --resource-group test --name ${{ env.AZURE_WEBAPP_NAME }} --command "python --version && pip freeze"
 
       - name: Deploy web App using GH Action azure/webapps-deploy
         uses: azure/webapps-deploy@v3
